@@ -1,0 +1,56 @@
+version: "3.8"
+   
+services:
+    web:
+        build: .
+        container_name: consult24
+        command: python manage.py runserver 0.0.0.0:8000
+        volumes:
+            - .:/usr/src/app
+        ports:
+            - "8088:8000"
+        env_file:
+            - ./.env
+        environment:
+            - SQL_ENGINE=django.db.backends.postgresql
+            - SQL_USER=accelx
+            - SQL_PASSWORD=Accelx123456
+            - SQL_HOST=db
+            - SQL_PORT=5432
+            - DATABASE=postgres
+        entrypoint: 
+            /entrypoint.sh
+        depends_on:
+            - db
+
+    db:
+        image: postgres:13.0-alpine
+        volumes:
+            - consult24_data:/var/lib/postgresql/data/
+        environment:
+            - POSTGRES_DB=c24_api
+            - POSTGRES_USER=accelx
+            - POSTGRES_PASSWORD=Accelx123456
+        ports:
+            - "5432:5432"
+
+    redis:
+       image: redis:alpine
+    celery:
+        restart: always
+        build:
+             context: .
+        volumes:
+           - .:/usr/src/app
+        env_file:
+            - ./.env
+        depends_on:
+        - db
+        - redis
+        
+
+
+volumes:
+    consult24_data:
+
+    
